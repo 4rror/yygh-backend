@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @CrossOrigin
@@ -85,5 +86,35 @@ public class HospitalSetController {
     public R updateById(@ApiParam(name = "hospitalSet", value = "医院设置对象", required = true) @RequestBody HospitalSet hospitalSet) {
         hospitalSetService.updateById(hospitalSet);
         return R.ok();
+    }
+
+    @ApiOperation(value = "批量删除医院设置")
+    @DeleteMapping("/batchRemove")
+    public R batchRemoveHospitalSet(@RequestBody List<Long> ids) {
+        hospitalSetService.removeByIds(ids);
+        return R.ok();
+    }
+
+    @GetMapping("/lockHospitalSet/{id}/{status}")
+    public R lockHospitalSet(@PathVariable("id") Long id, @PathVariable("status") Integer status) {
+        // status取值范围0-1，如果不在该范围，返回message = "status不合法", code = 20001
+        if (status != 0 && status != 1) {
+            return R.error().message("status不合法");
+        }
+        // 如果医院设置不存在，返回message = "该医院暂未开通权限", code = 20001
+        // 先查询
+        HospitalSet hospitalSet = hospitalSetService.getById(id);
+        if (hospitalSet == null) {
+            return R.error().message("该医院暂未开通权限");
+        }
+        // 如果该医院设置的status已经锁定状态，不需要重复锁定，在锁定之前，（status = 0） 判断status是否 = 0
+        if (hospitalSet.getStatus().intValue() == status) {
+            return R.error().message(status == 0 ? "请勿重复锁定" : "请勿重复解锁");
+        }
+        // 如果数据发生改变，updateTime需要一同更新
+        hospitalSet.setStatus(status);
+        hospitalSet.setUpdateTime(new Date());
+        boolean b = hospitalSetService.updateById(hospitalSet);
+        return b ? R.ok() : R.error();
     }
 }
