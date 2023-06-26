@@ -84,6 +84,9 @@ public class HospitalSetController {
     @ApiOperation(value = "根据ID修改医院设置")
     @PostMapping("updateHospSet")
     public R updateById(@ApiParam(name = "hospitalSet", value = "医院设置对象", required = true) @RequestBody HospitalSet hospitalSet) {
+        if (hospitalSet.getId() == null) {
+            return R.error().message("id不能为空");
+        }
         hospitalSetService.updateById(hospitalSet);
         return R.ok();
     }
@@ -95,6 +98,7 @@ public class HospitalSetController {
         return R.ok();
     }
 
+    @ApiOperation(value = "修改医院设置锁定状态")
     @GetMapping("/lockHospitalSet/{id}/{status}")
     public R lockHospitalSet(@PathVariable("id") Long id, @PathVariable("status") Integer status) {
         // status取值范围0-1，如果不在该范围，返回message = "status不合法", code = 20001
