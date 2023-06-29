@@ -41,7 +41,7 @@ public class HospitalSetController {
     }
 
     @ApiOperation(value = "分页条件查询")
-    @PostMapping("/{page}/{limit}")
+    @PostMapping("/findPageCondition/{page}/{limit}")
     public R pageQuery(@PathVariable("page") Long page, @PathVariable("limit") Long limit, @RequestBody HospitalSetQueryVo hospitalSetQueryVo) {
         // 1. 分页对象
         Page<HospitalSet> hospitalSetPage = new Page<>(page, limit);
@@ -99,7 +99,7 @@ public class HospitalSetController {
     }
 
     @ApiOperation(value = "修改医院设置锁定状态")
-    @GetMapping("/lockHospitalSet/{id}/{status}")
+    @PutMapping("/lockHospitalSet/{id}/{status}")
     public R lockHospitalSet(@PathVariable("id") Long id, @PathVariable("status") Integer status) {
         // status取值范围0-1，如果不在该范围，返回message = "status不合法", code = 20001
         if (status != 0 && status != 1) {

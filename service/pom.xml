@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>service_hosp</module>
+        <module>service_cmn</module>
     </modules>
 
     <properties>
@@ -46,6 +47,10 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
         <!--开发者工具-->
         <!-- <dependency> -->
