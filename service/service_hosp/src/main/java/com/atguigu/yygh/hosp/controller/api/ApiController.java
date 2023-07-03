@@ -42,6 +42,18 @@ public class ApiController {
     @Autowired
     private ScheduleService scheduleService;
 
+    @ApiOperation(value = "删除排班")
+    @PostMapping("schedule/remove")
+    public Result<Object> removeSchedule(HttpServletRequest request) {
+        Map<String, Object> paramMap = HttpRequestHelper.switchMap(request.getParameterMap());
+
+        String hoscode = (String) paramMap.get("hoscode");
+        String hosScheduleId = (String) paramMap.get("hosScheduleId");
+
+        scheduleService.remove(hoscode, hosScheduleId);
+        return Result.ok();
+    }
+
     @ApiOperation(value = "获取排班分页列表")
     @PostMapping("schedule/list")
     public Result schedule(HttpServletRequest request) {
