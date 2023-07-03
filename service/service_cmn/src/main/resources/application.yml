@@ -23,6 +23,10 @@ spring:
         min-idle: 0
     port: 6379
     timeout: 5000
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
