@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.atguigu.yygh.hosp.repository.ScheduleRepository;
 import com.atguigu.yygh.hosp.service.ScheduleService;
 import com.atguigu.yygh.model.hosp.Schedule;
+import com.atguigu.yygh.vo.hosp.ScheduleQueryVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -45,5 +48,24 @@ public class ScheduleServiceImpl implements ScheduleService {
             schedule.setStatus(1);
             scheduleRepository.save(schedule);
         }
+    }
+
+    @Override
+    public Page<Schedule> selectPage(Integer page, Integer limit, ScheduleQueryVo scheduleQueryVo) {
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createTime");
+        Pageable pageable = PageRequest.of(page - 1, limit, sort);
+
+        Schedule schedule = new Schedule();
+        BeanUtils.copyProperties(scheduleQueryVo, schedule);
+
+        // 创建匹配器，即如何使用查询条件
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
+                .withIgnoreCase(true);
+
+        Example<Schedule> example = Example.of(schedule, matcher);
+        Page<Schedule> pages = scheduleRepository.findAll(example, pageable);
+        return pages;
     }
 }
