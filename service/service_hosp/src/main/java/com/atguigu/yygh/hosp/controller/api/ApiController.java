@@ -1,6 +1,5 @@
-package com.atguigu.yygh.hosp.controller;
+package com.atguigu.yygh.hosp.controller.api;
 
-import com.alibaba.fastjson.JSONObject;
 import com.atguigu.yygh.common.exception.YyghException;
 import com.atguigu.yygh.common.result.Result;
 import com.atguigu.yygh.common.util.HttpRequestHelper;
@@ -37,9 +36,19 @@ public class ApiController {
     @Autowired
     private DepartmentService departmentService;
 
+    @PostMapping("/department/remove")
+    public Result<Object> removeDepartment(HttpServletRequest request) {
+        Map<String, Object> paramMap = HttpRequestHelper.switchMap(request.getParameterMap());
+        // 签名校验略
+        String hoscode = (String) paramMap.get("hoscode");
+        String depcode = (String) paramMap.get("depcode");
+        departmentService.remove(hoscode, depcode);
+        return Result.ok();
+    }
+
     @ApiOperation(value = "获取分页列表")
     @PostMapping("/department/list")
-    public Result<Object> department(HttpServletRequest request) {
+    public Result<Object> departmentList(HttpServletRequest request) {
         Map<String, Object> paramMap = HttpRequestHelper.switchMap(request.getParameterMap());
         // 签名校验略
         String hoscode = (String) paramMap.get("hoscode");
@@ -70,7 +79,7 @@ public class ApiController {
         // 必要参数校验
         String hoscode = (String) paramMap.get("hoscode");
         if (StringUtils.isEmpty(hoscode)) {
-            throw new YyghException(20001, "失败");
+            throw new YyghException(20001, "hoscode为空");
         }
         // 签名校验略
         Hospital hospital = hospitalService.getByHoscode(hoscode);

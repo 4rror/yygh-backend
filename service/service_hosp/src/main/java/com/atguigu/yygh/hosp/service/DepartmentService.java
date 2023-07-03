@@ -14,4 +14,6 @@ public interface DepartmentService {
     void saveDepartment(Map<String, Object> paramMap);
 
     Page<Department> selectPage(int page, int limit, DepartmentQueryVo queryVo);
+
+    void remove(String hoscode, String depcode);
 }
