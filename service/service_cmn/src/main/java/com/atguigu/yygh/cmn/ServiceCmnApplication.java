@@ -3,11 +3,13 @@ package com.atguigu.yygh.cmn;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author haisky
  */
 @SpringBootApplication
+@EnableTransactionManagement
 @ComponentScan(basePackages = {"com.atguigu"})
 public class ServiceCmnApplication {
     public static void main(String[] args) {
