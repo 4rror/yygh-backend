@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
-@CrossOrigin
 @RestController
 @Api(description = "医院设置接口")
 @RequestMapping("/admin/hosp/hospitalSet")

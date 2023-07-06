@@ -8,7 +8,6 @@ import java.util.Arrays;
 /**
  * @author haisky
  */
-@CrossOrigin
 @RestController
 @RequestMapping("/admin/hosp")
 public class LoginController {

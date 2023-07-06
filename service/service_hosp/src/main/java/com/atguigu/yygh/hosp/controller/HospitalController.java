@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 /**
  * @author haisky
  */
-@CrossOrigin
 @RestController
 @Api(description = "医院接口")
 @RequestMapping("/admin/hosp/hospital")

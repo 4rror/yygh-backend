@@ -15,7 +15,6 @@ import java.util.List;
 /**
  * @author haisky
  */
-@CrossOrigin
 @RestController
 @Api(description = "数据字典接口")
 @RequestMapping("/admin/cmn/dict")
