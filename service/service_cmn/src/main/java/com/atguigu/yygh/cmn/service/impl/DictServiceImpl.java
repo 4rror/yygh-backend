@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -64,6 +65,37 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public String getName(String value, String dictCode) {
+        if (StringUtils.isEmpty(dictCode)) {
+            QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("value", value);
+            List<Dict> dictList = baseMapper.selectList(queryWrapper);
+            if (dictList.size() > 1) {
+                return "该value = " + value + "值不唯一";
+            }
+            return dictList.size() > 0 ? dictList.get(0).getName() : "该value没有对应的名称";
+        } else {
+            QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("value", value).eq("parent_id", getDictByDictCode(dictCode).getId());
+            return baseMapper.selectOne(queryWrapper).getName();
+        }
+    }
+
+    @Override
+    public List<Dict> findByDictCode(String dictCode) {
+        // 通过dict先查询到记录
+        QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("parent_id", getDictByDictCode(dictCode).getId());
+        return baseMapper.selectList(queryWrapper);
+    }
+
+    private Dict getDictByDictCode(String dictCode) {
+        QueryWrapper<Dict> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("dict_code", dictCode);
+        return baseMapper.selectOne(queryWrapper);
     }
 
     @CacheEvict(value = "dict", allEntries = true)

@@ -18,11 +18,27 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @Api(description = "数据字典接口")
-@RequestMapping("/admin/cmn/dict/")
+@RequestMapping("/admin/cmn/dict")
 public class DictController {
 
     @Autowired
     private DictService dictService;
+
+    @GetMapping("/findByDictCode/{dictCode}")
+    public R findByDictCode(@PathVariable("dictCode") String dictCode) {
+        List<Dict> dictList = dictService.findByDictCode(dictCode);
+        return R.ok().data("list", dictList);
+    }
+
+    @GetMapping("/getName/{value}")
+    public String getName(@PathVariable String value) {
+        return dictService.getName(value, "");
+    }
+
+    @GetMapping("/getName/{value}/{dictCode}")
+    public String getName(@PathVariable("value") String value, @PathVariable("dictCode") String dictCode) {
+        return dictService.getName(value, dictCode);
+    }
 
     @ApiOperation(value = "导入数据字典")
     @PostMapping("importData")

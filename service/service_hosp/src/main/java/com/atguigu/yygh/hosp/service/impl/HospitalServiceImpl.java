@@ -1,18 +1,24 @@
 package com.atguigu.yygh.hosp.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.atguigu.yygh.cmn.client.DictFeignClient;
 import com.atguigu.yygh.common.exception.YyghException;
+import com.atguigu.yygh.common.result.ResultCode;
 import com.atguigu.yygh.common.util.MD5;
+import com.atguigu.yygh.enums.DictEnum;
 import com.atguigu.yygh.hosp.repository.HospitalRepository;
 import com.atguigu.yygh.hosp.service.HospitalService;
 import com.atguigu.yygh.hosp.service.HospitalSetService;
 import com.atguigu.yygh.model.hosp.Hospital;
+import com.atguigu.yygh.vo.hosp.HospitalQueryVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author haisky
@@ -25,6 +31,9 @@ public class HospitalServiceImpl implements HospitalService {
 
     @Autowired
     private HospitalSetService hospitalSetService;
+
+    @Autowired
+    private DictFeignClient dictFeignClient;
 
     @Override
     public void save(Map<String, Object> paramMap) {
@@ -74,5 +83,78 @@ public class HospitalServiceImpl implements HospitalService {
     @Override
     public Hospital getByHoscode(String hoscode) {
         return hospitalRepository.getHospitalByHoscode(hoscode);
+    }
+
+    @Override
+    public Page<Hospital> pageList(HospitalQueryVo hospitalQueryVo, Integer pageNum, Integer pageSize) {
+        // 获取查询参数
+        String hosname = hospitalQueryVo.getHosname();
+        String cityCode = hospitalQueryVo.getCityCode();
+        String provinceCode = hospitalQueryVo.getProvinceCode();
+        String districtCode = hospitalQueryVo.getDistrictCode();
+
+        // 封装查询对象
+        Hospital hospital = new Hospital();
+        hospital.setHosname(hosname);
+        hospital.setCityCode(cityCode);
+        hospital.setProvinceCode(provinceCode);
+        hospital.setDistrictCode(districtCode);
+
+        // 模糊匹配器
+        ExampleMatcher matcher = ExampleMatcher.matching().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING).withIgnoreCase(true);
+
+        // 创建Example
+        Example<Hospital> example = Example.of(hospital, matcher);
+
+        // 创建分页
+        PageRequest pageRequest = PageRequest.of(pageNum - 1, pageSize, Sort.by(Sort.Direction.DESC, "createTime"));
+
+        // 执行
+        Page<Hospital> all = hospitalRepository.findAll(example, pageRequest);
+
+        // 将查询到的当前页面结果集中的每一个hospital的param属性存入两个属性 hostypeString 和 fullAddress
+        all.getContent().forEach(this::packHospital);
+
+        return all;
+    }
+
+    @Override
+    public void updateStatus(String id, Integer status) {
+        Hospital hospital = hospitalRepository.findById(id).orElse(null);
+        if (Objects.isNull(hospital)) {
+            throw new YyghException(ResultCode.ERROR, "没有找到医院");
+        }
+        hospital.setStatus(status);
+        hospital.setUpdateTime(new Date());
+
+        hospitalRepository.save(hospital);
+    }
+
+    @Override
+    public Hospital getById(String id) {
+        Hospital hospital = hospitalRepository.findById(id).orElse(null);
+        if (hospital == null) {
+            throw new YyghException(ResultCode.ERROR, "未查找到该医院");
+        }
+        packHospital(hospital);
+        return hospital;
+    }
+
+    private void packHospital(Hospital item) {
+        String hostypeValue = item.getHostype();
+        String provinceCode = item.getProvinceCode();
+        String cityCode = item.getCityCode();
+        String districtCode = item.getDistrictCode();
+
+        String hostypeString = dictFeignClient.getName(hostypeValue, DictEnum.HOSTYPE.getDictCode());
+
+        String provinceString = dictFeignClient.getName(provinceCode);
+        String cityString = dictFeignClient.getName(cityCode);
+        String districtString = dictFeignClient.getName(districtCode);
+
+        String fullAddress = provinceString + cityString + districtString + item.getAddress();
+
+        item.getParam().put("hostypeString", hostypeString);
+        item.getParam().put("fullAddress", fullAddress);
     }
 }

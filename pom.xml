@@ -11,6 +11,7 @@
         <module>model</module>
         <module>service</module>
         <module>common</module>
+        <module>service_client</module>
     </modules>
 
     <parent>
