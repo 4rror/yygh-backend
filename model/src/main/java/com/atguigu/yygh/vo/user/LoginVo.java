@@ -17,6 +17,6 @@ public class LoginVo {
     @ApiModelProperty(value = "验证码")
     private String code;
 
-    @ApiModelProperty(value = "IP")
-    private String ip;
+    // @ApiModelProperty(value = "IP")
+    // private String ip;
 }

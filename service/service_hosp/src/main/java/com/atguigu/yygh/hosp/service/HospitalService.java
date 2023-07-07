@@ -4,12 +4,18 @@ import com.atguigu.yygh.model.hosp.Hospital;
 import com.atguigu.yygh.vo.hosp.HospitalQueryVo;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author haisky
  */
 public interface HospitalService {
+
+    /**
+     * 根据医院名称获取医院列表
+     */
+    List<Hospital> findByHosname(String hosname);
 
     /**
      * 上传医院信息
@@ -25,6 +31,11 @@ public interface HospitalService {
      * @return
      */
     Hospital getByHoscode(String hoscode);
+
+    /**
+     * 医院预约挂号详情
+     */
+    Map<String, Object> item(String hoscode);
 
     Page<Hospital> pageList(HospitalQueryVo hospitalQueryVo, Integer pageNum, Integer pageSize);
 

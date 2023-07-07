@@ -16,9 +16,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author haisky
@@ -92,6 +90,8 @@ public class HospitalServiceImpl implements HospitalService {
         String cityCode = hospitalQueryVo.getCityCode();
         String provinceCode = hospitalQueryVo.getProvinceCode();
         String districtCode = hospitalQueryVo.getDistrictCode();
+        String hostype = hospitalQueryVo.getHostype();
+        Integer status = hospitalQueryVo.getStatus();
 
         // 封装查询对象
         Hospital hospital = new Hospital();
@@ -99,6 +99,8 @@ public class HospitalServiceImpl implements HospitalService {
         hospital.setCityCode(cityCode);
         hospital.setProvinceCode(provinceCode);
         hospital.setDistrictCode(districtCode);
+        hospital.setHostype(hostype);
+        hospital.setStatus(status);
 
         // 模糊匹配器
         ExampleMatcher matcher = ExampleMatcher.matching().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING).withIgnoreCase(true);
@@ -138,6 +140,26 @@ public class HospitalServiceImpl implements HospitalService {
         }
         packHospital(hospital);
         return hospital;
+    }
+
+
+    @Override
+    public List<Hospital> findByHosname(String hosname) {
+        return hospitalRepository.findHospitalByHosnameLike(hosname);
+    }
+
+    @Override
+    public Map<String, Object> item(String hoscode) {
+        Map<String, Object> result = new HashMap<>();
+        // 医院详情
+        Hospital hospital = hospitalRepository.findByHoscode(hoscode);
+        this.packHospital(hospital);
+        result.put("hospital", hospital);
+        // 预约规则
+        result.put("bookingRule", hospital.getBookingRule());
+        // 不需要重复返回
+        hospital.setBookingRule(null);
+        return result;
     }
 
     private void packHospital(Hospital item) {
