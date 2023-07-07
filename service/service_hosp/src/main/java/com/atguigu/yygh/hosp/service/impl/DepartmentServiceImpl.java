@@ -5,13 +5,17 @@ import com.atguigu.yygh.hosp.repository.DepartmentRepository;
 import com.atguigu.yygh.hosp.service.DepartmentService;
 import com.atguigu.yygh.model.hosp.Department;
 import com.atguigu.yygh.vo.hosp.DepartmentQueryVo;
+import com.atguigu.yygh.vo.hosp.DepartmentVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author haisky
@@ -69,5 +73,29 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (department != null) {
             departmentRepository.deleteById(department.getId());
         }
+    }
+
+    @Override
+    public List<DepartmentVo> findDeptTree(String hoscode) {
+        List<Department> departmentList = departmentRepository.findByHoscode(hoscode);
+        Map<String, List<Department>> map = departmentList.stream().collect(Collectors.groupingBy(Department::getBigcode));
+        List<DepartmentVo> departmentVoList = new ArrayList<>();
+        map.forEach((k, v) -> {
+            DepartmentVo departmentVo = new DepartmentVo();
+            departmentVo.setDepcode(k);
+            departmentVo.setDepname(v.size() > 0 ? v.get(0).getBigname() : "暂无名称");
+            departmentVo.setChildren(this.transferVo(v));
+            departmentVoList.add(departmentVo);
+        });
+        return departmentVoList;
+    }
+
+    private List<DepartmentVo> transferVo(List<Department> v) {
+        return v.stream().map(i -> {
+            DepartmentVo departmentVo = new DepartmentVo();
+            departmentVo.setDepname(i.getDepname());
+            departmentVo.setDepcode(i.getDepcode());
+            return departmentVo;
+        }).collect(Collectors.toList());
     }
 }
