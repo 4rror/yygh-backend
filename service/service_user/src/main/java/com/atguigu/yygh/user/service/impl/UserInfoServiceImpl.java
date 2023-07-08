@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,6 +72,109 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
 
         // 4. 如果存在，判断该用户的status状态是否被锁定，抛出自定义异常，提示用户被锁定
+        // String name = userInfo.getName();
+        // if (StringUtils.isEmpty(name)) {
+        //     name = userInfo.getNickName();
+        //     if (StringUtils.isEmpty(name)) {
+        //         name = userInfo.getPhone();
+        //     }
+        // }
+        // String token = JwtHelper.createToken(userInfo.getId(), name);
+        //
+        // Map<String, Object> map = new HashMap<>();
+        // map.put("token", token);
+        // map.put("name", name);
+
+        Map<String, Object> map = this.getMap(userInfo);
+
+        // 5. 准备返回值：name + token
+        //    name: 右上角显示的内容，有线取userInfo中的name，如果为空取出nick_name，依然为空最后取出phone
+        //    token: 当前用户登陆成功后，服务端办法的jwt格式的令牌，该令牌是加密的，令牌中会存储用户的一部分信息，例如：用户的id，用户的name
+        // 前端收到name和token后，存储在浏览器的cookie中
+        // 登陆成功后，前端每次发起的请求，都会主动从cookie中获取token令牌，放在请求头中，一些传递给服务端接口
+        // 服务端接受到该令牌之后，可以校验，可以解析其中的信息
+        return map;
+    }
+
+    @Override
+    public UserInfo selectByOpenid(String openid) {
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("openid", openid);
+        return baseMapper.selectOne(queryWrapper);
+    }
+
+    /**
+     * 为微信用户登陆绑定手机号
+     *
+     * @param loginVo 登陆参数
+     */
+    @Override
+    public Map<String, Object> bundle(LoginVo loginVo) {
+        // 1. 非空校验
+        String code = loginVo.getCode();
+        String phone = loginVo.getPhone();
+        String openid = loginVo.getOpenid();
+
+        if (StringUtils.isEmpty(code)) {
+            throw new YyghException(ResultCode.ERROR, "验证码不能为空");
+        }
+        if (StringUtils.isEmpty(phone)) {
+            throw new YyghException(ResultCode.ERROR, "手机号不能为空");
+        }
+        if (StringUtils.isEmpty(openid)) {
+            throw new YyghException(ResultCode.ERROR, "openid为null");
+        }
+
+        // 2. 短信验证码校验
+        String codeFromRedis = stringRedisTemplate.opsForValue().get(phone);
+        if (StringUtils.isEmpty(codeFromRedis)) {
+            throw new YyghException(ResultCode.ERROR, "验证码不存在，请重新发送");
+        }
+        if (!code.equals(codeFromRedis)) {
+            throw new YyghException(ResultCode.ERROR, "验证码错误");
+        }
+
+        // 3. 根据openid查询微信用户
+        UserInfo userInfoByOpenid = this.selectByOpenid(openid);
+
+        // 4. 根据phone查询手机号用户
+        UserInfo userInfoByPhone = this.selectByPhone(phone);
+
+        // 5. 判断4的返回值为null，说明，该手机号在数据库中不存在，可以直接绑定
+        if (userInfoByPhone == null) {
+            userInfoByOpenid.setPhone(phone);
+            userInfoByOpenid.setUpdateTime(new Date());
+            baseMapper.updateById(userInfoByOpenid);
+
+            // 判断用户是否被锁定
+            if (userInfoByOpenid.getStatus() == 0) {
+                throw new YyghException(ResultCode.ERROR, "用户被锁定");
+            }
+            return this.getMap(userInfoByOpenid);
+        } else {
+            // 6. 手机号已经存在
+            // 6.1 已存在手机号的对象是否有openid，有就抛出异常
+            if (!StringUtils.isEmpty(userInfoByPhone.getOpenid())) {
+                throw new YyghException(ResultCode.ERROR, "手机号已被占用");
+            }
+            // 6.2 没有openid，删除没有openid的记录，为微信用户绑定phone
+            baseMapper.deleteById(userInfoByPhone.getId());
+            userInfoByOpenid.setPhone(phone);
+            userInfoByOpenid.setUpdateTime(new Date());
+            baseMapper.updateById(userInfoByOpenid);
+
+            return this.getMap(userInfoByOpenid);
+        }
+    }
+
+    @Override
+    public UserInfo selectByPhone(String phone) {
+        QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("phone", phone);
+        return baseMapper.selectOne(queryWrapper);
+    }
+
+    private Map<String, Object> getMap(UserInfo userInfo) {
         String name = userInfo.getName();
         if (StringUtils.isEmpty(name)) {
             name = userInfo.getNickName();
@@ -79,17 +183,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             }
         }
         String token = JwtHelper.createToken(userInfo.getId(), name);
-
         Map<String, Object> map = new HashMap<>();
-        map.put("token", token);
         map.put("name", name);
-
-        // 5. 准备返回值：name + token
-        //    name: 右上角显示的内容，有线取userInfo中的name，如果为空取出nick_name，依然为空最后取出phone
-        //    token: 当前用户登陆成功后，服务端办法的jwt格式的令牌，该令牌是加密的，令牌中会存储用户的一部分信息，例如：用户的id，用户的name
-        // 前端收到name和token后，存储在浏览器的cookie中
-        // 登陆成功后，前端每次发起的请求，都会主动从cookie中获取token令牌，放在请求头中，一些传递给服务端接口
-        // 服务端接受到该令牌之后，可以校验，可以解析其中的信息
+        map.put("token", token);
         return map;
     }
 }

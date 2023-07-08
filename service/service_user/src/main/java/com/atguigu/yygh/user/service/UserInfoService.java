@@ -11,4 +11,10 @@ import java.util.Map;
  */
 public interface UserInfoService extends IService<UserInfo> {
     Map<String, Object> login(LoginVo loginVo);
+
+    UserInfo selectByOpenid(String openid);
+
+    UserInfo selectByPhone(String phone);
+
+    Map<String, Object> bundle(LoginVo loginVo);
 }
