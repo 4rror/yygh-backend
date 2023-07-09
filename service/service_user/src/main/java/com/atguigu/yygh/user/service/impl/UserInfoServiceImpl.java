@@ -8,6 +8,7 @@ import com.atguigu.yygh.model.user.UserInfo;
 import com.atguigu.yygh.user.mapper.UserInfoMapper;
 import com.atguigu.yygh.user.service.UserInfoService;
 import com.atguigu.yygh.vo.user.LoginVo;
+import com.atguigu.yygh.vo.user.UserAuthVo;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,22 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Override
+    public void userAuth(Long userId, UserAuthVo userAuthVo) {
+        // 根据用户id查询用户信息
+        UserInfo userInfo = baseMapper.selectById(userId);
+
+        // 赋值
+        userInfo.setName(userAuthVo.getName());
+        userInfo.setCertificatesType(userAuthVo.getCertificatesType());
+        userInfo.setCertificatesNo(userAuthVo.getCertificatesNo());
+        userInfo.setCertificatesUrl(userAuthVo.getCertificatesUrl());
+        userInfo.setAuthStatus(AuthStatusEnum.AUTH_RUN.getStatus());// 认证中（就是已提交）
+
+        // 进行信息更新
+        baseMapper.updateById(userInfo);
+    }
 
     @Override
     public Map<String, Object> login(LoginVo loginVo) {
