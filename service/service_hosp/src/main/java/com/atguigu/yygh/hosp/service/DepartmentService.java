@@ -20,4 +20,10 @@ public interface DepartmentService {
     void remove(String hoscode, String depcode);
 
     List<DepartmentVo> findDeptTree(String hoscode);
+
+    /**
+     * 根据医院编号 和 科室编号获取科室数据
+     */
+    Department getDepartment(String hoscode, String depcode);
+
 }

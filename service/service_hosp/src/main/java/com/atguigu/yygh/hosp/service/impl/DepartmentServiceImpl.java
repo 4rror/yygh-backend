@@ -27,6 +27,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     private DepartmentRepository departmentRepository;
 
     @Override
+    public Department getDepartment(String hoscode, String depcode) {
+        return departmentRepository.getDepartmentByHoscodeAndDepcode(hoscode, depcode);
+    }
+
+    @Override
     public void saveDepartment(Map<String, Object> paramMap) {
         // 1、paramMap变成对象
         String jsonString = JSONObject.toJSONString(paramMap);

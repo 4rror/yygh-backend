@@ -39,4 +39,14 @@ public interface ScheduleService {
     Map<String, Object> getScheduleRuleVoList(Long page, Long limit, String hoscode, String depcode);
 
     List<Schedule> getScheduleDetail(String hoscode, String depcode, String workDate);
+
+    /**
+     * 获取排班可预约日期数据
+     *
+     * @param page
+     * @param limit
+     * @param hoscode
+     * @param depcode
+     */
+    Map<String, Object> getBookingScheduleRule(Integer page, Integer limit, String hoscode, String depcode);
 }
