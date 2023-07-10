@@ -53,6 +53,13 @@ public class ScheduleServiceImpl implements ScheduleService {
     private DepartmentService departmentService;
 
     @Override
+    public Schedule getById(String id) {
+        Schedule schedule = scheduleRepository.findById(id).get();
+        this.packSchedule(schedule);// param属性赋值（医院名称，科室名称，星期）
+        return schedule;
+    }
+
+    @Override
     public Map<String, Object> getBookingScheduleRule(Integer page, Integer limit, String hoscode, String depcode) {
         Map<String, Object> result = new HashMap<>();
 

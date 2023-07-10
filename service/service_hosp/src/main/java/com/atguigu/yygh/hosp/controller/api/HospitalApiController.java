@@ -37,6 +37,13 @@ public class HospitalApiController {
     @Autowired
     private ScheduleService scheduleService;
 
+    @ApiOperation(value = "获取排班详情")
+    @GetMapping("getSchedule/{id}")
+    public R getScheduleList(@PathVariable String id) {
+        Schedule schedule = scheduleService.getById(id);
+        return R.ok().data("schedule",schedule);
+    }
+
     @ApiOperation(value = "获取可预约排班数据")
     @GetMapping("auth/getBookingScheduleRule/{page}/{limit}/{hoscode}/{depcode}")
     public R getBookingSchedule(
