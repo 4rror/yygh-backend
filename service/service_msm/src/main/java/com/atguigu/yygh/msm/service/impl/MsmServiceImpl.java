@@ -2,6 +2,8 @@ package com.atguigu.yygh.msm.service.impl;
 
 import com.atguigu.yygh.common.msm.HttpUtils;
 import com.atguigu.yygh.msm.service.MsmService;
+import com.atguigu.yygh.vo.msm.MsmVo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -15,11 +17,21 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author haisky
  */
+@Slf4j
 @Service
 public class MsmServiceImpl implements MsmService {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Override
+    public boolean send(MsmVo msmVo) {
+        String phone = msmVo.getPhone();
+        String message = String.valueOf(msmVo.getParam().get("message"));
+        // System.out.println(phone + "【尚医通】" + message);
+        log.info("{} 【尚医通】：{}", phone, message);
+        return false;
+    }
 
     @Override
     public void send(String phone) {

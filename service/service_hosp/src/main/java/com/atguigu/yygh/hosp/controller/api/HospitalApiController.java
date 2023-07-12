@@ -8,6 +8,7 @@ import com.atguigu.yygh.model.hosp.Hospital;
 import com.atguigu.yygh.model.hosp.Schedule;
 import com.atguigu.yygh.vo.hosp.DepartmentVo;
 import com.atguigu.yygh.vo.hosp.HospitalQueryVo;
+import com.atguigu.yygh.vo.hosp.ScheduleOrderVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +38,17 @@ public class HospitalApiController {
     @Autowired
     private ScheduleService scheduleService;
 
+    @ApiOperation(value = "根据排班id获取预约下单数据")
+    @GetMapping("/inner/getScheduleOrderVo/{scheduleId}")
+    public ScheduleOrderVo getScheduleOrderVo(@PathVariable("scheduleId") String scheduleId) {
+        return scheduleService.getScheduleOrderVo(scheduleId);
+    }
+
     @ApiOperation(value = "获取排班详情")
     @GetMapping("getSchedule/{id}")
     public R getScheduleList(@PathVariable String id) {
         Schedule schedule = scheduleService.getById(id);
-        return R.ok().data("schedule",schedule);
+        return R.ok().data("schedule", schedule);
     }
 
     @ApiOperation(value = "获取可预约排班数据")
@@ -65,7 +72,7 @@ public class HospitalApiController {
                               @PathVariable String workDate) {
         // List<Schedule> scheduleList = scheduleService.getDetailShedule(hoscode, depcode, workDate);
         List<Schedule> scheduleList = scheduleService.getScheduleDetail(hoscode, depcode, workDate);
-        return R.ok().data("scheduleList",scheduleList);
+        return R.ok().data("scheduleList", scheduleList);
     }
 
     @ApiOperation(value = "获取科室列表")

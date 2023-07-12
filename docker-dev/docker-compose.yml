@@ -64,3 +64,11 @@ services:
       - NACOS_AUTH_IDENTITY_KEY=2222
       - NACOS_AUTH_IDENTITY_VALUE=2xxx
       - NACOS_AUTH_TOKEN=SecretKey012345678901234567890123456789012345678901234567890123456789
+
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    container_name: yygh-rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672

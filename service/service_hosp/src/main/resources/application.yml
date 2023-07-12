@@ -25,7 +25,13 @@ spring:
     nacos:
       discovery:
         server-addr: 192.168.56.101:8848
-    #mybatis日志
+  rabbitmq:
+    host: 192.168.56.101
+    port: 5672
+    username: guest
+    password: guest
+
+#mybatis日志
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
