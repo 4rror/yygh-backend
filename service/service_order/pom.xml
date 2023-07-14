@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>service_orders</artifactId>
+    <artifactId>service_order</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
