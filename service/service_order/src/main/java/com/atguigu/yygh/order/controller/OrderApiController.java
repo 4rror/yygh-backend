@@ -25,6 +25,13 @@ public class OrderApiController {
     @Autowired
     private OrderInfoService orderInfoService;
 
+    @ApiOperation(value = "取消预约")
+    @GetMapping("auth/cancelOrder/{orderId}")
+    public R cancelOrder(@PathVariable("orderId") Long orderId) {
+        Boolean flag = orderInfoService.cancelOrder(orderId);
+        return R.ok().data("flag", flag);
+    }
+
     // 根据订单id查询订单详情
     @GetMapping("auth/getOrder/{orderId}")
     public R getOrder(@PathVariable Long orderId) {

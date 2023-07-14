@@ -43,6 +43,7 @@ weixin:
     partner: 1558950191
     # 商户key
     partnerkey: T6m9iK73b0kn9g5v426MKfHQH7X8rKwb
+  cert: apiclient_cert.p12
 
 mybatis-plus:
   configuration:

@@ -19,4 +19,12 @@ public interface PaymentService extends IService<PaymentInfo> {
     // paymentType  支付类型 微信 支付宝
     // paramMap 调用微信查询支付状态接口返回map集合
     void paySuccess(Map<String, String> paramMap);
+
+    /**
+     * 根据订单id查询支付记录
+     *
+     * @param orderId
+     * @return
+     */
+    PaymentInfo getPaymentInfo(Long orderId);
 }

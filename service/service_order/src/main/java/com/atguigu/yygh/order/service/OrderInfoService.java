@@ -22,4 +22,11 @@ public interface OrderInfoService extends IService<OrderInfo> {
      * 获取订单详情
      */
     OrderInfo getOrderInfo(Long id);
+
+    /**
+     * 取消预约
+     *
+     * @param orderId 平台端订单id
+     */
+    Boolean cancelOrder(Long orderId);
 }

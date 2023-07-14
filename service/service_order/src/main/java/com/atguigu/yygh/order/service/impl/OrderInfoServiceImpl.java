@@ -11,6 +11,7 @@ import com.atguigu.yygh.model.order.OrderInfo;
 import com.atguigu.yygh.model.user.Patient;
 import com.atguigu.yygh.order.mapper.OrderInfoMapper;
 import com.atguigu.yygh.order.service.OrderInfoService;
+import com.atguigu.yygh.order.service.WeixinService;
 import com.atguigu.yygh.user.feign.PatientFeignClient;
 import com.atguigu.yygh.vo.hosp.ScheduleOrderVo;
 import com.atguigu.yygh.vo.msm.MsmVo;
@@ -43,6 +44,63 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     @Autowired
     private RabbitService rabbitService;
+
+    @Autowired
+    private WeixinService weixinService;
+
+    @Override
+    public Boolean cancelOrder(Long orderId) {
+        // 1、查询平台端订单
+        OrderInfo orderInfo = this.getById(orderId);
+
+        // 2、如果退号时间已过，不能取消预约
+        DateTime quitTime = new DateTime(orderInfo.getQuitTime());
+        // if (quitTime.isBeforeNow()) {
+        //     throw new YyghException(20001, "如果退号时间已过，不能取消预约");
+        // }
+
+        // 3、调用医院端取消预约接口
+        Map<String, Object> reqMap = new HashMap<>();
+        reqMap.put("hoscode", orderInfo.getHoscode());
+        reqMap.put("hosRecordId", orderInfo.getHosRecordId());
+
+        String apiUrl = hospitalFeignClient.getApiUrl(orderInfo.getHoscode());
+        String url = apiUrl + "/order/updateCancelStatus";
+
+        JSONObject result = HttpRequestHelper.sendRequest(reqMap, url);
+
+        if (result.getInteger("code") != 200) {
+            throw new YyghException(20001, "医院端取消预约接口调用失败");
+        }
+
+        // 4、判断订单状态是否已支付，执行退款流程；退款流程写在weixinService中
+        if (orderInfo.getOrderStatus() == OrderStatusEnum.PAID.getStatus()) {
+            boolean isRefund = weixinService.refund(orderId);
+            if (!isRefund) {
+                throw new YyghException(20001, "退款失败");
+            }
+        }
+
+        // 5、更改平台端订单状态为已取消
+        orderInfo.setOrderStatus(OrderStatusEnum.CANCLE.getStatus());
+        this.updateById(orderInfo);
+
+        // 6、异步更新mongodb排班号源数量+给就诊人发送短信通知
+        // 医院服务接收到消息后，判断消息中如果存在两个num，说明是创建订单；如果没有两个num说明是取消订单。
+        // 创建订单时将mg中排班的号源数量更新成医院端返回的两个num
+        // 取消订单时将mg中排班的号源数量+1即可
+        OrderMqVo mqVo = new OrderMqVo();
+        mqVo.setScheduleId(orderInfo.getScheduleId());
+
+        MsmVo msmVo = new MsmVo();
+        msmVo.setPhone(orderInfo.getPatientPhone());
+        msmVo.getParam().put("message", "取消成功");
+        mqVo.setMsmVo(msmVo);
+        // 第一个队列中发送消息
+        rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_ORDER, MqConst.ROUTING_ORDER, mqVo);
+
+        return true;
+    }
 
     @Override
     public OrderInfo getOrderInfo(Long id) {

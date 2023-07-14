@@ -34,6 +34,13 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, PaymentInfo> 
     private HospitalFeignClient hospitalFeignClient;
 
     @Override
+    public PaymentInfo getPaymentInfo(Long orderId) {
+        QueryWrapper<PaymentInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("order_id", orderId);
+        return baseMapper.selectOne(queryWrapper);
+    }
+
+    @Override
     public void paySuccess(Map<String, String> resultMap) {
         // 0、根据out_trade_no查询订单
         String out_trade_no = resultMap.get("out_trade_no");
