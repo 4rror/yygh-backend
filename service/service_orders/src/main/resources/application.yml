@@ -9,7 +9,7 @@ spring:
         server-addr: 192.168.56.101:8848
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/yygh_order?serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.56.101:3306/yygh_order?serverTimezone=GMT%2B8&characterEncoding=utf-8&useSSL=false
     username: root
     password: password
   jackson:
@@ -33,3 +33,17 @@ spring:
     port: 5672
     username: guest
     password: guest
+
+# 关联的公众号appid
+weixin:
+  pay:
+    # 关联的公众号appid
+    appid: wx74862e0dfcf69954
+    # 商户号
+    partner: 1558950191
+    # 商户key
+    partnerkey: T6m9iK73b0kn9g5v426MKfHQH7X8rKwb
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

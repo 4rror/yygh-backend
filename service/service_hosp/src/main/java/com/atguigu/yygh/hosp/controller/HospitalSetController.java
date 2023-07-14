@@ -24,6 +24,11 @@ public class HospitalSetController {
     @Autowired
     private HospitalSetService hospitalSetService;
 
+    @GetMapping("/getApiUrl/{hoscode}")
+    public String getApiUrl(@PathVariable String hoscode) {
+        return hospitalSetService.getApiUrl(hoscode);
+    }
+
     // 查询所有医院设置
     @ApiOperation(value = "医院设置列表")
     @GetMapping("/findAll")

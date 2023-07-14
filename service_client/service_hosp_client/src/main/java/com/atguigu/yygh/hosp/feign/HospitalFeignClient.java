@@ -15,4 +15,7 @@ public interface HospitalFeignClient {
      */
     @GetMapping("/api/hosp/hospital/inner/getScheduleOrderVo/{scheduleId}")
     ScheduleOrderVo getScheduleOrderVo(@PathVariable("scheduleId") String scheduleId);
+
+    @GetMapping("/admin/hosp/hospitalSet/getApiUrl/{hoscode}")
+    String getApiUrl(@PathVariable String hoscode);
 }
