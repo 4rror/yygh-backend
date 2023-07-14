@@ -17,4 +17,12 @@ public class MqConst {
     public static final String EXCHANGE_DIRECT_MSM = "exchange.direct.msm";// 第二个交换机名称
     public static final String ROUTING_MSM_ITEM = "msm.item";// 队列和交换机绑定时指定的key
     public static final String QUEUE_MSM_ITEM = "queue.msm.item";// 第二个队列名称
+
+    /**
+     * 定时任务服务
+     */
+    public static final String EXCHANGE_DIRECT_TASK = "exchange.direct.task";// 第二个交换机名称
+    public static final String ROUTING_TASK_ITEM = "task.item";// 队列和交换机绑定时指定的key
+    public static final String QUEUE_TASK_ITEM = "queue.task.item";// 第二个队列名称
+
 }
